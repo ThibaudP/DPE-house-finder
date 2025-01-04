@@ -35,7 +35,8 @@ function Result({ result }) {
       </p>
       <p className="text-xs">
         {result['Surface_habitable_logement']}m² - DPE :{' '}
-        {result['Etiquette_DPE']} - GES : {result['Etiquette_GES']}
+        {result['Etiquette_DPE']} - GES : {result['Etiquette_GES']} -{' '}
+        {result['Année_construction']}
       </p>
       <p className="text-xs hover:underline">
         <a href={coordsLink} target="_blank">

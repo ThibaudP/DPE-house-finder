@@ -1,15 +1,19 @@
-import { useEffect } from 'react';
-import { lambert93ToWGS84 } from '../../utils/lambertToGPS';
 import Result from './Result';
 
-function Results({ searchResults, error }) {
+function Results({ searchResults, totalResults, loading, error }) {
+  if (totalResults && totalResults > 12) {
+    return (
+      <div className="p-4 mt-2 rounded-lg shadow-lg bg-white text-red-500">
+        Trop de résultats ({totalResults}). Merci d'affiner votre recherche
+      </div>
+    );
+  }
+
   return (
     <div className="p-4 mt-2 rounded-lg shadow-lg bg-white">
+      {loading && <p>Chargement en cours...</p>}
       {searchResults
-        ? searchResults.length +
-          ' résultat' +
-          (searchResults.length > 1 ? 's' : '') +
-          ':'
+        ? totalResults + ' résultat' + (totalResults > 1 ? 's' : '') + ':'
         : 'Aucun résultat'}
       {error && <p className="text-red-500">{error.message}</p>}
       <div

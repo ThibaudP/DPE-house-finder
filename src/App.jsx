@@ -6,9 +6,9 @@ import Results from './components/Results/Results';
 
 function App() {
   const [formData, setFormData] = useState({
-    date: '2024-09-02',
-    conso: '57',
-    location: '44360',
+    date: '',
+    conso: '',
+    location: '',
     note_dpe: '',
     note_ges: '',
     surface: '',
@@ -33,7 +33,7 @@ function App() {
     console.log(formData);
     try {
       const results = await fetchHouses(formData);
-      setSearchResults(results.results);
+      setSearchResults(results);
     } catch (e) {
       setError(e);
       console.log(e);
@@ -41,6 +41,21 @@ function App() {
 
     setLoading(false);
   };
+
+  const handleClearForm = (e) => {
+    e.preventDefault();
+    setFormData({
+      date: '',
+      conso: '',
+      location: '',
+      note_dpe: '',
+      note_ges: '',
+      surface: '',
+      annee: '',
+    });
+    setSearchResults(false);
+  };
+
   return (
     <div className="container mx-auto">
       <div id="top" className="h-16 shadow-lg flex bg-white rounded-b-lg">
@@ -55,10 +70,15 @@ function App() {
       <Form
         handleFormSubmit={handleFormSubmit}
         handleFormChange={handleFormChange}
+        handleClearForm={handleClearForm}
         formData={formData}
       />
-      {loading && <p>Loading...</p>}
-      <Results searchResults={searchResults} error={error} />
+      <Results
+        searchResults={searchResults.results}
+        totalResults={searchResults.total}
+        error={error}
+        loading={loading}
+      />
     </div>
   );
 }

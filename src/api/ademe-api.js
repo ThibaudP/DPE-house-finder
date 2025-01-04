@@ -5,13 +5,6 @@ const linesEndpoint =
 
 const fetchHouses = async (data) => {
   const { date, conso, location, note_dpe, note_ges, surface, annee } = data;
-  // console.log(data);
-
-  // if (!location || !date || !conso) {
-  //   throw new Error(
-  //     'Erreur: ceci est une v0.1 donc il faut rempli tous les champs :)'
-  //   );
-  // }
 
   if (location && location.length != 2 && location.length != 5) {
     throw new Error(
@@ -45,17 +38,32 @@ const fetchHouses = async (data) => {
   }
 
   if (note_ges) {
-    queryParts.push(`Etiquette_GES=${note_ges}`);
+    queryParts.push(`Etiquette_GES:${note_ges}`);
+  }
+
+  if (surface) {
+    const surfaceRange = {
+      start: Math.floor(surface) - 5,
+      end: Math.floor(surface) + 5,
+    };
+    queryParts.push(
+      `Surface_habitable_logement:[${surfaceRange.start} TO ${surfaceRange.end}]`
+    );
+  }
+
+  if (annee) {
+    const anneeRange = {
+      start: Math.floor(annee) - 5,
+      end: Math.floor(annee) + 5,
+    };
+    queryParts.push(
+      `Année_construction:[${anneeRange.start} TO ${anneeRange.end}]`
+    );
   }
 
   const queryString = encodeURIComponent(queryParts.join(' AND '));
 
   console.log(queryString);
-
-  const params = `Conso_5_usages_par_m²_é_primaire:${conso} AND Date_réception_DPE:${date} AND Code_postal_\\(BAN\\):${location}`;
-
-  // console.log(params.toString());
-  // console.log(params);
 
   const url = `${linesEndpoint}?qs=${queryString}`;
   const response = await fetch(url);
