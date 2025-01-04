@@ -64,7 +64,7 @@ function Form({
           onChange={handleFormChange}
           value={formData.note_dpe}
           maxlength="1"
-          pattern="[A-Ga-g]"
+          pattern="[A-G]"
           title="L'étiquette DPE doit être une lettre entre A et G."
         />
 
@@ -79,7 +79,7 @@ function Form({
           onChange={handleFormChange}
           value={formData.note_ges}
           maxlength="1"
-          pattern="[A-Ga-g]"
+          pattern="[A-G]"
           title="L'étiquette GES doit être une lettre entre A et G."
         />
 
