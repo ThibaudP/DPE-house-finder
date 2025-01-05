@@ -38,6 +38,7 @@ function Result({ result }) {
         {result['Etiquette_DPE']} - GES : {result['Etiquette_GES']} -{' '}
         {result['Année_construction']}
       </p>
+      <p className='text-xs'>Date d'établissement du DPE: {result['Date_établissement_DPE']}</p>
       <p className="text-xs hover:underline">
         <a href={coordsLink} target="_blank">
           GPS : {GPSCoords[1]},{GPSCoords[0]}
