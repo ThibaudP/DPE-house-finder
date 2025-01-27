@@ -1,9 +1,54 @@
-function Form({
-  handleFormSubmit,
-  handleFormChange,
-  handleClearForm,
-  formData,
-}) {
+import { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
+
+function Form() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [formData, setFormData] = useState({
+    date: searchParams.get('date') || '',
+    location: searchParams.get('location') || '',
+    conso: searchParams.get('conso') || '',
+    note_dpe: searchParams.get('note_dpe') || '',
+    note_ges: searchParams.get('note_ges') || '',
+    surface: searchParams.get('surface') || '',
+    annee: searchParams.get('annee') || '',
+  });
+
+  const handleFormSubmit = (e) => {
+    e.preventDefault();
+
+    // Filter out empty values
+    const params = Object.fromEntries(
+      Object.entries(formData).filter(([_, value]) => value !== '')
+    );
+
+    // Update URL and trigger fetch only on submit
+    setSearchParams({
+      ...params,
+      submitted: 'true',
+    });
+  };
+
+  const handleFormChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleClearForm = () => {
+    setFormData({
+      date: '',
+      location: '',
+      conso: '',
+      note_dpe: '',
+      note_ges: '',
+      surface: '',
+      annee: '',
+    });
+    setSearchParams({});
+  };
+
   return (
     <div className="p-4 mt-2 rounded-lg shadow-lg bg-white">
       <form
@@ -11,7 +56,6 @@ function Form({
         onSubmit={handleFormSubmit}
         aria-label="Formulaire DPE"
       >
-        {/* Date du DPE */}
         <label htmlFor="date" className="w-full">
           Date d'établissement du DPE
         </label>
@@ -26,7 +70,6 @@ function Form({
           aria-label="Date d'établissement du DPE"
         />
 
-        {/* Localisation */}
         <label htmlFor="location">Code postal (ou département)</label>
         <input
           type="text"
@@ -39,62 +82,60 @@ function Form({
           pattern="^\d{2}$|^\d{5}$"
           title="Entrez un département à 2 chiffres ou un Code Postal à 5 chiffres"
           aria-required="true"
-          aria-label="Code postal ou département"
         />
 
-        {/* Consommation primaire par m2 */}
-        <label htmlFor="conso">
-          Consommation d'énergie primaire (kWh/m2/an)
-        </label>
+        <label htmlFor="conso">Consommation énergétique</label>
         <input
           type="number"
           id="conso"
           name="conso"
           className="border invalid:text-red-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent rounded-md"
-          placeholder="Consommation d'énergie primaire par m2"
+          placeholder="kWh/m²/an"
           onChange={handleFormChange}
           value={formData.conso}
           min="0"
           step="1"
           aria-required="true"
-          aria-label="Consommation d'énergie primaire en kWh/m2/an"
         />
 
-        {/* Etiquette DPE */}
-        <label htmlFor="note_dpe">Etiquette DPE</label>
-        <input
-          type="text"
+        <label htmlFor="note_dpe">Note DPE</label>
+        <select
           id="note_dpe"
           name="note_dpe"
           className="border invalid:text-red-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent rounded-md"
-          placeholder="Etiquette DPE"
           onChange={handleFormChange}
           value={formData.note_dpe}
-          maxlength="1"
-          pattern="[A-G]"
-          title="L'étiquette DPE doit être une lettre entre A et G."
           aria-required="true"
-          aria-label="Étiquette DPE"
-        />
+        >
+          <option value="">Sélectionnez une note</option>
+          <option value="A">A</option>
+          <option value="B">B</option>
+          <option value="C">C</option>
+          <option value="D">D</option>
+          <option value="E">E</option>
+          <option value="F">F</option>
+          <option value="G">G</option>
+        </select>
 
-        {/* Etiquette GES */}
-        <label htmlFor="note_ges">Etiquette GES: </label>
-        <input
-          type="text"
+        <label htmlFor="note_ges">Note GES</label>
+        <select
           id="note_ges"
           name="note_ges"
           className="border invalid:text-red-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent rounded-md"
-          placeholder="Etiquette GES"
           onChange={handleFormChange}
           value={formData.note_ges}
-          maxlength="1"
-          pattern="[A-G]"
-          title="L'étiquette GES doit être une lettre entre A et G."
           aria-required="true"
-          aria-label="Étiquette GES"
-        />
+        >
+          <option value="">Sélectionnez une note</option>
+          <option value="A">A</option>
+          <option value="B">B</option>
+          <option value="C">C</option>
+          <option value="D">D</option>
+          <option value="E">E</option>
+          <option value="F">F</option>
+          <option value="G">G</option>
+        </select>
 
-        {/* Surface */}
         <label htmlFor="surface">Surface habitable</label>
         <input
           type="number"
@@ -107,10 +148,8 @@ function Form({
           min="0"
           step="1"
           aria-required="true"
-          aria-label="Surface habitable en mètres carrés"
         />
 
-        {/* Année de construction */}
         <label htmlFor="annee">Année de construction</label>
         <input
           type="number"
@@ -125,10 +164,8 @@ function Form({
           step="1"
           title="Entrez une année entre 1600 et 2100"
           aria-required="true"
-          aria-label="Année de construction du bâtiment"
         />
 
-        {/* Buttons container */}
         <div className="md:col-span-2 flex justify-end gap-4 mt-4">
           <button
             type="button"
@@ -143,7 +180,7 @@ function Form({
             className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
             aria-label="Soumettre le formulaire"
           >
-            Envoyer
+            Rechercher
           </button>
         </div>
       </form>
