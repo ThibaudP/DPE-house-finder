@@ -6,11 +6,59 @@ import { fetchHouses } from './api/ademe-api';
 import Form from './components/Form/Form';
 import Results from './components/Results/Results';
 
+const INITIAL_FORM_STATE = {
+  date: '',
+  location: '',
+  conso: '',
+  note_dpe: '',
+  note_ges: '',
+  surface: '',
+  annee: '',
+};
+
 function App() {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [formData, setFormData] = useState({
+    ...INITIAL_FORM_STATE,
+    date: searchParams.get('date') || '',
+    location: searchParams.get('location') || '',
+    conso: searchParams.get('conso') || '',
+    note_dpe: searchParams.get('note_dpe') || '',
+    note_ges: searchParams.get('note_ges') || '',
+    surface: searchParams.get('surface') || '',
+    annee: searchParams.get('annee') || '',
+  });
   const [results, setResults] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  const handleFormChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleFormSubmit = (e) => {
+    e.preventDefault();
+
+    const params = Object.fromEntries(
+      Object.entries(formData).filter(([_, value]) => value !== '')
+    );
+
+    setSearchParams({
+      ...params,
+      submitted: 'true',
+    });
+  };
+
+  const handleClearForm = () => {
+    setFormData(INITIAL_FORM_STATE);
+    setSearchParams({});
+    setResults(null);
+    setError(null);
+  };
 
   useEffect(() => {
     const fetchResults = async () => {
@@ -65,7 +113,7 @@ function App() {
   return (
     <div className="container mx-auto">
       <Toaster
-        position="top-center"
+        position="top-right"
         toastOptions={{
           success: {
             duration: 3000,
@@ -88,7 +136,14 @@ function App() {
         }}
       />
       <div id="top" className="h-16 shadow-lg flex bg-white rounded-b-lg">
-        <h1 className="header-title content-center ml-4 font-semibold text-xl">
+        <h1
+          onClick={handleClearForm}
+          className="header-title content-center ml-4 font-semibold text-xl cursor-pointer hover:text-blue-600 transition-colors"
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => e.key === 'Enter' && handleClearForm()}
+          aria-label="Réinitialiser la recherche"
+        >
           DPE house finder
         </h1>
       </div>
@@ -96,7 +151,12 @@ function App() {
         DPE house finder vous permet de retrouver l'adresse d'un bien à partir
         des informations de son DPE.
       </div>
-      <Form />
+      <Form
+        formData={formData}
+        onFormChange={handleFormChange}
+        onFormSubmit={handleFormSubmit}
+        onClearForm={handleClearForm}
+      />
       <Results
         searchResults={results?.results}
         totalResults={results?.total}

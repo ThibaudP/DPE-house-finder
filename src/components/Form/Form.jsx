@@ -1,59 +1,12 @@
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
-function Form() {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [formData, setFormData] = useState({
-    date: searchParams.get('date') || '',
-    location: searchParams.get('location') || '',
-    conso: searchParams.get('conso') || '',
-    note_dpe: searchParams.get('note_dpe') || '',
-    note_ges: searchParams.get('note_ges') || '',
-    surface: searchParams.get('surface') || '',
-    annee: searchParams.get('annee') || '',
-  });
-
-  const handleFormSubmit = (e) => {
-    e.preventDefault();
-
-    // Filter out empty values
-    const params = Object.fromEntries(
-      Object.entries(formData).filter(([_, value]) => value !== '')
-    );
-
-    // Update URL and trigger fetch only on submit
-    setSearchParams({
-      ...params,
-      submitted: 'true',
-    });
-  };
-
-  const handleFormChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const handleClearForm = () => {
-    setFormData({
-      date: '',
-      location: '',
-      conso: '',
-      note_dpe: '',
-      note_ges: '',
-      surface: '',
-      annee: '',
-    });
-    setSearchParams({});
-  };
-
+function Form({ formData, onFormChange, onFormSubmit, onClearForm }) {
   return (
     <div className="p-4 mt-2 rounded-lg shadow-lg bg-white">
       <form
         className="grid grid-cols-1 md:grid-cols-2 gap-4"
-        onSubmit={handleFormSubmit}
+        onSubmit={onFormSubmit}
         aria-label="Formulaire DPE"
       >
         <label htmlFor="date" className="w-full">
@@ -64,7 +17,7 @@ function Form() {
           id="date"
           name="date"
           className="border invalid:text-red-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent rounded-md"
-          onChange={handleFormChange}
+          onChange={onFormChange}
           value={formData.date}
           aria-required="true"
           aria-label="Date d'établissement du DPE"
@@ -77,7 +30,7 @@ function Form() {
           name="location"
           className="border invalid:text-red-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent rounded-md"
           placeholder="Code Postal"
-          onChange={handleFormChange}
+          onChange={onFormChange}
           value={formData.location}
           pattern="^\d{2}$|^\d{5}$"
           title="Entrez un département à 2 chiffres ou un Code Postal à 5 chiffres"
@@ -91,7 +44,7 @@ function Form() {
           name="conso"
           className="border invalid:text-red-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent rounded-md"
           placeholder="kWh/m²/an"
-          onChange={handleFormChange}
+          onChange={onFormChange}
           value={formData.conso}
           min="0"
           step="1"
@@ -103,7 +56,7 @@ function Form() {
           id="note_dpe"
           name="note_dpe"
           className="border invalid:text-red-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent rounded-md"
-          onChange={handleFormChange}
+          onChange={onFormChange}
           value={formData.note_dpe}
           aria-required="true"
         >
@@ -122,7 +75,7 @@ function Form() {
           id="note_ges"
           name="note_ges"
           className="border invalid:text-red-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent rounded-md"
-          onChange={handleFormChange}
+          onChange={onFormChange}
           value={formData.note_ges}
           aria-required="true"
         >
@@ -143,7 +96,7 @@ function Form() {
           name="surface"
           className="border invalid:text-red-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent rounded-md"
           placeholder="Surface habitable"
-          onChange={handleFormChange}
+          onChange={onFormChange}
           value={formData.surface}
           min="0"
           step="1"
@@ -157,7 +110,7 @@ function Form() {
           name="annee"
           className="border invalid:text-red-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent rounded-md"
           placeholder="Année de construction"
-          onChange={handleFormChange}
+          onChange={onFormChange}
           value={formData.annee}
           min="1600"
           max="2100"
@@ -169,7 +122,7 @@ function Form() {
         <div className="md:col-span-2 flex justify-end gap-4 mt-4">
           <button
             type="button"
-            onClick={handleClearForm}
+            onClick={onClearForm}
             className="px-4 py-2 border rounded-md hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500"
             aria-label="Réinitialiser le formulaire"
           >
