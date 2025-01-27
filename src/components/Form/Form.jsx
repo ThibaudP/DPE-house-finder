@@ -1,6 +1,3 @@
-import { useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
-
 function Form({ formData, onFormChange, onFormSubmit, onClearForm }) {
   return (
     <div className="p-4 mt-2 rounded-lg shadow-lg bg-white">
