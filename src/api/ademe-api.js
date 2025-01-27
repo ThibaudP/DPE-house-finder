@@ -1,15 +1,17 @@
 import { getDateRange } from '../utils/utils';
+import { rateLimiter } from '../utils/rateLimit';
 
 const ENDPOINTS = {
-  LINES: 'https://data.ademe.fr/data-fair/api/v1/datasets/dpe-v2-logements-existants/lines'
+  LINES:
+    'https://data.ademe.fr/data-fair/api/v1/datasets/dpe-v2-logements-existants/lines',
 };
 
 const CONSTANTS = {
   RANGE_TOLERANCE: {
     SURFACE: 5,
-    YEAR: 5
+    YEAR: 5,
   },
-  DEFAULT_LIMIT: 100
+  DEFAULT_LIMIT: 100,
 };
 
 /**
@@ -18,21 +20,15 @@ const CONSTANTS = {
  * @returns {string} The encoded query string
  */
 const buildQueryString = (filters) => {
-  const {
-    date,
-    conso,
-    location,
-    note_dpe,
-    note_ges,
-    surface,
-    annee
-  } = filters;
+  const { date, conso, location, note_dpe, note_ges, surface, annee } = filters;
 
   const queryParts = [];
 
   if (date) {
     const dateRange = getDateRange(date);
-    queryParts.push(`Date_réception_DPE:[${dateRange.start} TO ${dateRange.end}]`);
+    queryParts.push(
+      `Date_réception_DPE:[${dateRange.start} TO ${dateRange.end}]`
+    );
   }
 
   if (conso) {
@@ -58,17 +54,21 @@ const buildQueryString = (filters) => {
   if (surface) {
     const surfaceRange = {
       start: Math.floor(surface) - CONSTANTS.RANGE_TOLERANCE.SURFACE,
-      end: Math.floor(surface) + CONSTANTS.RANGE_TOLERANCE.SURFACE
+      end: Math.floor(surface) + CONSTANTS.RANGE_TOLERANCE.SURFACE,
     };
-    queryParts.push(`Surface_habitable_logement:[${surfaceRange.start} TO ${surfaceRange.end}]`);
+    queryParts.push(
+      `Surface_habitable_logement:[${surfaceRange.start} TO ${surfaceRange.end}]`
+    );
   }
 
   if (annee) {
     const anneeRange = {
       start: Math.floor(annee) - CONSTANTS.RANGE_TOLERANCE.YEAR,
-      end: Math.floor(annee) + CONSTANTS.RANGE_TOLERANCE.YEAR
+      end: Math.floor(annee) + CONSTANTS.RANGE_TOLERANCE.YEAR,
     };
-    queryParts.push(`Année_construction:[${anneeRange.start} TO ${anneeRange.end}]`);
+    queryParts.push(
+      `Année_construction:[${anneeRange.start} TO ${anneeRange.end}]`
+    );
   }
 
   return encodeURIComponent(queryParts.join(' AND '));
@@ -83,7 +83,9 @@ const validateInput = (data) => {
   const { location, limit, page } = data;
 
   if (location && location.length !== 2 && location.length !== 5) {
-    throw new Error('Le département doit comporter 2 chiffres ou la commune doit comporter 5 chiffres');
+    throw new Error(
+      'Le département doit comporter 2 chiffres ou la commune doit comporter 5 chiffres'
+    );
   }
 
   if (limit && (typeof limit !== 'number' || limit <= 0)) {
@@ -111,17 +113,19 @@ const validateInput = (data) => {
  */
 const fetchHouses = async (data) => {
   try {
-    validateInput(data);
+    // Check rate limit before making request
+    await rateLimiter.tryRequest();
 
+    validateInput(data);
     const queryString = buildQueryString(data);
     const limit = data.limit || CONSTANTS.DEFAULT_LIMIT;
     const page = data.page || 1;
     const skip = (page - 1) * limit;
 
     const url = `${ENDPOINTS.LINES}?qs=${queryString}&size=${limit}&skip=${skip}`;
-    
+
     const response = await fetch(url);
-    
+
     if (!response.ok) {
       throw new Error(`Erreur API: ${response.status} ${response.statusText}`);
     }
@@ -129,6 +133,9 @@ const fetchHouses = async (data) => {
     const json = await response.json();
     return json;
   } catch (error) {
+    if (error.message.includes('Trop de requêtes')) {
+      throw error; // Re-throw rate limit errors
+    }
     console.error('Erreur lors de la récupération des données:', error);
     throw error;
   }
