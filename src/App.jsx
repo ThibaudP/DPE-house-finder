@@ -4,56 +4,49 @@ import { fetchHouses } from './api/ademe-api';
 import Form from './components/Form/Form';
 import Results from './components/Results/Results';
 
+const initialFormState = {
+  date: '',
+  conso: '',
+  location: '',
+  note_dpe: '',
+  note_ges: '',
+  surface: '',
+  annee: '',
+};
+
 function App() {
-  const [formData, setFormData] = useState({
-    date: '',
-    conso: '',
-    location: '',
-    note_dpe: '',
-    note_ges: '',
-    surface: '',
-    annee: '',
-  });
+  const [formData, setFormData] = useState(initialFormState);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [searchResults, setSearchResults] = useState({ results: [], total: 0 });
 
   const handleFormChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    setFormData((prevData) => ({ ...prevData, [name]: value }));
   };
-
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(false);
-  const [searchResults, setSearchResults] = useState(false);
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
-    setError(false);
 
-    setLoading(true);
-    setSearchResults(false);
-    console.log(formData);
     try {
+      setError(null);
+      setLoading(true);
+      setSearchResults({ results: [], total: 0 });
+
       const results = await fetchHouses(formData);
       setSearchResults(results);
-    } catch (e) {
-      setError(e);
-      console.log(e);
+    } catch (error) {
+      setError(error);
+      console.error('Error fetching houses:', error);
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   const handleClearForm = (e) => {
     e.preventDefault();
-    setFormData({
-      date: '',
-      conso: '',
-      location: '',
-      note_dpe: '',
-      note_ges: '',
-      surface: '',
-      annee: '',
-    });
-    setSearchResults(false);
+    setFormData(initialFormState);
+    setSearchResults({ results: [], total: 0 });
   };
 
   return (

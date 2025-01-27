@@ -1,31 +1,51 @@
 import Result from './Result';
+import Map from '../Map/Map';
 
 function Results({ searchResults, totalResults, loading, error }) {
-  if (totalResults && totalResults > 12) {
+  const renderHeader = () => {
+    if (loading) return <p className="mb-4">Chargement en cours...</p>;
+    if (error) return <p className="text-red-500 mb-4">{error.message}</p>;
+    if (totalResults && totalResults > 12) {
+      return (
+        <p className="text-red-500 mb-4">
+          Trop de résultats ({totalResults}). Merci d'affiner votre recherche
+        </p>
+      );
+    }
     return (
-      <div className="p-4 mt-2 rounded-lg shadow-lg bg-white text-red-500">
-        Trop de résultats ({totalResults}). Merci d'affiner votre recherche
-      </div>
+      <p className="mb-4">
+        {searchResults
+          ? `${totalResults} résultat${totalResults > 1 ? 's' : ''} :`
+          : 'Aucun résultat'}
+      </p>
     );
-  }
+  };
 
   return (
-    <div className="p-4 mt-2 rounded-lg shadow-lg bg-white">
-      {loading && <p>Chargement en cours...</p>}
-      {searchResults
-        ? totalResults + ' résultat' + (totalResults > 1 ? 's' : '') + ':'
-        : 'Aucun résultat'}
-      {error && <p className="text-red-500">{error.message}</p>}
-      <div
-        className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"
-        name="cards-container"
-      >
-        {searchResults &&
-          searchResults.map((result) => {
-            return <Result result={result} key={result._id} />;
-          })}
-      </div>
-    </div>
+    <section
+      className="p-4 mt-2 rounded-lg shadow-lg bg-white"
+      aria-live="polite"
+      aria-busy={loading}
+    >
+      {renderHeader()}
+
+      {searchResults && searchResults.length > 0 && (
+        <>
+          <div className="mb-4">
+            <Map searchResults={searchResults} />
+          </div>
+          <div
+            className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"
+            role="list"
+            aria-label="Résultats de recherche"
+          >
+            {searchResults.map((result) => (
+              <Result result={result} key={result._id} />
+            ))}
+          </div>
+        </>
+      )}
+    </section>
   );
 }
 
