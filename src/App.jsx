@@ -39,8 +39,16 @@ function App() {
   }, [searchParams]); // Still watch all params to catch submit
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-4">DPE Search</h1>
+    <div className="container mx-auto">
+      <div id="top" className="h-16 shadow-lg flex bg-white rounded-b-lg">
+        <h1 className="header-title content-center ml-4 font-semibold text-xl">
+          DPE house finder
+        </h1>
+      </div>
+      <div className="p-4 mt-2 rounded-lg shadow-lg bg-white">
+        DPE house finder vous permet de retrouver l'adresse d'un bien à partir
+        des informations de son DPE.
+      </div>
       <Form />
       <Results
         searchResults={results?.results}
