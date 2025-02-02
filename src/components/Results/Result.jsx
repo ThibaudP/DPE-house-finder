@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
 import { lambert93ToWGS84 } from '../../utils/lambertToGPS';
+import { fetchRisks } from '../../api/georisques-api';
 
 function Result({ result }) {
   const [GPSCoords, setGPSCoords] = useState([]);
   const [coordsLink, setCoordsLink] = useState('');
   const [addressLink, setAddressLink] = useState('');
+  const [risks, setRisks] = useState({});
 
   useEffect(() => {
     // Move coordinate calculation to a separate function for clarity
@@ -30,10 +32,20 @@ function Result({ result }) {
     setAddressLink(
       `${baseGoogleMapsLink}${encodeURIComponent(result['Adresse_(BAN)'])}`
     );
+
+    // Fetch risks for the current result
+    fetchRisks(result['Adresse_(BAN)'])
+      .then((risks) => {
+        setRisks(risks);
+        console.log(risks);
+      })
+      .catch((error) => {
+        console.error('Error fetching risks:', error);
+      });
   }, [result]);
 
   return (
-    <article className="bg-gray-100 rounded-md shadow-lg p-4 hover:shadow-xl transition-shadow">
+    <div className="bg-gray-100 rounded-md shadow-lg p-4 hover:shadow-xl transition-shadow">
       <h2 className="font-medium hover:underline">
         <a
           href={addressLink}
@@ -81,8 +93,23 @@ function Result({ result }) {
             GPS : {GPSCoords[1]},{GPSCoords[0]}
           </a>
         </p>
+        <p className="text-sm font-bold">
+          Rapport Georisques :
+        </p>
+        <ul className='text-sm'>
+          {risks?.risquesNaturels &&
+            Object.entries(risks?.risquesNaturels).map(([key, value]) => (
+              <li key={key}>{value.libelle === 'Vent violant' ? 'Vent violent' : value.libelle} : {value.present ? <span className='text-red-500'>Présent</span> : <span className='text-green-500'>Absent</span>}</li>
+            ))}
+        </ul>
+        <ul className='text-sm'>
+          {risks?.risquesTechnologiques &&
+            Object.entries(risks?.risquesTechnologiques).map(([key, value]) => (
+              <li key={key}>{value.libelle} : {value.present ? <span className='text-red-500'>Présent</span> : <span className='text-green-500'>Absent</span>}</li>
+            ))}
+        </ul>
       </div>
-    </article>
+    </div>
   );
 }
 
@@ -102,7 +129,7 @@ const getDPEColor = (etiquette) => {
 
 const getGESColor = (etiquette) => {
   // Similar to getDPEColor
-  return getDPEColor(etiquette); // For simplicity, using same colors
+  return getDPEColor(etiquette);
 };
 
 const formatDate = (dateString) => {

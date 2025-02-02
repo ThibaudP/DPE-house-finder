@@ -2,7 +2,7 @@ class RateLimiter {
   constructor() {
     // Store timestamps in localStorage to persist across page refreshes
     this.key = 'api_requests';
-    this.maxRequests = 10;
+    this.maxRequests = 50;
     this.timeWindow = 60000; // 1 minute in milliseconds
   }
 
