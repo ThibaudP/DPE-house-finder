@@ -93,19 +93,34 @@ function Result({ result }) {
             GPS : {GPSCoords[1]},{GPSCoords[0]}
           </a>
         </p>
-        <p className="text-sm font-bold">
-          Rapport Georisques :
-        </p>
-        <ul className='text-sm'>
+        {!!Object.keys(risks).length && <p className="text-sm font-bold">Rapport Georisques :</p>}
+        <ul className="text-sm">
           {risks?.risquesNaturels &&
             Object.entries(risks?.risquesNaturels).map(([key, value]) => (
-              <li key={key}>{value.libelle === 'Vent violant' ? 'Vent violent' : value.libelle} : {value.present ? <span className='text-red-500'>Présent</span> : <span className='text-green-500'>Absent</span>}</li>
+              <li key={key}>
+                {value.libelle === 'Vent violant'
+                  ? 'Vent violent'
+                  : value.libelle}{' '}
+                :{' '}
+                {value.present ? (
+                  <span className="text-red-500">Présent</span>
+                ) : (
+                  <span className="text-green-500">Absent</span>
+                )}
+              </li>
             ))}
         </ul>
-        <ul className='text-sm'>
+        <ul className="text-sm">
           {risks?.risquesTechnologiques &&
             Object.entries(risks?.risquesTechnologiques).map(([key, value]) => (
-              <li key={key}>{value.libelle} : {value.present ? <span className='text-red-500'>Présent</span> : <span className='text-green-500'>Absent</span>}</li>
+              <li key={key}>
+                {value.libelle} :{' '}
+                {value.present ? (
+                  <span className="text-red-500">Présent</span>
+                ) : (
+                  <span className="text-green-500">Absent</span>
+                )}
+              </li>
             ))}
         </ul>
       </div>

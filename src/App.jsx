@@ -4,6 +4,7 @@ import { Toaster, toast } from 'react-hot-toast';
 import './App.css';
 import { fetchHouses } from './api/ademe-api';
 import Form from './components/Form/Form';
+import ListingSearch from './components/Form/ListingSearch';
 import Results from './components/Results/Results';
 
 const INITIAL_FORM_STATE = {
@@ -15,6 +16,8 @@ const INITIAL_FORM_STATE = {
   surface: '',
   annee: '',
 };
+
+const SCRAPER_ENDPOINT = 'http://localhost:3000/scrape';
 
 function App() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -28,6 +31,8 @@ function App() {
     surface: searchParams.get('surface') || '',
     annee: searchParams.get('annee') || '',
   });
+  const [listingUrl, setListingUrl] = useState('');
+  const [loadingListingData, setLoadingListingData] = useState(false);
   const [results, setResults] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -58,6 +63,44 @@ function App() {
     setSearchParams({});
     setResults(null);
     setError(null);
+  };
+
+  const handleListingChange = (e) => {
+    const newUrl = e.target.value;
+    setListingUrl(newUrl);
+  };
+
+  const handleListingSubmit = async (e) => {
+    e.preventDefault();
+
+    if (listingUrl) {
+      try {
+        const response = await fetch(SCRAPER_ENDPOINT, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ url: listingUrl }),
+        });
+        if (!response.ok) {
+          throw new Error(`Error: ${response.statusText}`);
+        }
+        const data = await response.json();
+
+        setFormData((prev) => ({
+          ...prev,
+          date: data.date,
+          location: data.location,
+          conso: data.conso,
+          note_dpe: data.note_dpe,
+          note_ges: data.note_ges,
+          surface: data.surface,
+          annee: data.annee,
+        }));
+      } catch (error) {
+        toast.error(error.message);
+      }
+    }
   };
 
   useEffect(() => {
@@ -111,7 +154,7 @@ function App() {
   }, [searchParams]); // Still watch all params to catch submit
 
   return (
-    <div className="container mx-auto">
+    <div className="container mx-auto mb-8">
       <Toaster
         position="top-right"
         toastOptions={{
@@ -150,7 +193,14 @@ function App() {
       <div className="p-4 mt-2 rounded-lg shadow-lg bg-white">
         DPE house finder vous permet de retrouver l'adresse d'un bien à partir
         des informations de son DPE.
+        <br />
+        <br />
       </div>
+      <ListingSearch
+        listingUrl={listingUrl}
+        onSubmit={handleListingSubmit}
+        onChange={handleListingChange}
+      />
       <Form
         formData={formData}
         onFormChange={handleFormChange}
@@ -163,6 +213,11 @@ function App() {
         loading={loading}
         error={error}
       />
+      <div className="fixed bottom-0 left-0 bg-white mt-2 z-[800] border border-gray-200 w-full text-right ">
+        <p className="text-xs">
+          Scraping : {import.meta.env.VITE_SCRAPING_ENABLED}
+        </p>
+      </div>
     </div>
   );
 }

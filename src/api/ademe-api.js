@@ -11,7 +11,7 @@ const CONSTANTS = {
     SURFACE: 5,
     YEAR: 5,
   },
-  DEFAULT_LIMIT: 100,
+  DEFAULT_LIMIT: 12,
 };
 
 /**
@@ -107,7 +107,7 @@ const validateInput = (data) => {
  * @param {string} [data.note_ges] - GES rating filter
  * @param {number} [data.surface] - Surface area filter
  * @param {number} [data.annee] - Construction year filter
- * @param {number} [data.limit=100] - Number of results per page
+ * @param {number} [data.limit=12] - Number of results per page
  * @param {number} [data.page=1] - Page number
  * @returns {Promise<Object>} The API response
  */
